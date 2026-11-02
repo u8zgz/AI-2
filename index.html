@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein kostenloser Gemini Chat</title>
+    <title>Kostenloser Gemini Chat (Ohne API Key)</title>
     <style>
         :root {
             --bg-color: #131314;
             --chat-bg: #1e1f20;
             --text-color: #e3e3e3;
             --input-bg: #282a2d;
-            --accent-color: #4b90ff;
+            --accent-color: #00a8ff;
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -61,7 +61,8 @@
             display: flex;
             gap: 10px;
         }
-        #api-key-input, #user-input {
+        #user-input {
+            flex: 1;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #444;
@@ -69,8 +70,6 @@
             color: white;
             font-size: 1rem;
         }
-        #api-key-input { width: 250px; }
-        #user-input { flex: 1; }
         button {
             padding: 12px 24px;
             background-color: var(--accent-color);
@@ -85,75 +84,51 @@
         .loading { font-style: italic; color: #888; }
     </style>
 
-    <!-- Import Map für das Google Gen AI SDK -->
-    <script type="importmap">
-        {
-            "imports": {
-                "@google/generative-ai": "https://esm.run/@google/generative-ai"
-            }
-        }
-    </script>
+    <!-- Einbinden des kostenlosen Puter AI SDKs -->
+    <script src="https://js.puter.com/v2/"></script>
 </head>
 <body>
 
-    <header>✨ Gemini AI Schnittstelle</header>
+    <header>🚀 Gemini Chat (Kein Key erforderlich)</header>
 
     <div id="chat-container">
-        <div class="message gemini-message">Hallo! Gib oben oder unten deinen API-Key ein und schreibe mir eine Nachricht.</div>
+        <div class="message gemini-message">Hallo! Ich bin Gemini. Frag mich einfach etwas, ganz ohne API-Key!</div>
     </div>
 
     <div id="input-container">
-        <input type="password" id="api-key-input" placeholder="Google AI Studio API Key hier einfügen...">
-        <input type="text" id="user-input" placeholder="Frage Gemini etwas..." disabled>
-        <button id="send-btn" disabled>Senden</button>
+        <input type="text" id="user-input" placeholder="Frage Gemini etwas...">
+        <button id="send-btn">Senden</button>
     </div>
 
-    <script type="module">
-        import { GoogleGenerativeAI } from "@google/generative-ai";
-
-        const apiKeyInput = document.getElementById("api-key-input");
+    <script>
         const userInput = document.getElementById("user-input");
         const sendBtn = document.getElementById("send-btn");
         const chatContainer = document.getElementById("chat-container");
 
-        // API Key Überprüfung beim Tippen
-        apiKeyInput.addEventListener("input", () => {
-            const hasKey = apiKeyInput.value.trim().length > 0;
-            userInput.disabled = !hasKey;
-            sendBtn.disabled = !hasKey;
-        });
-
         async function sendMessage() {
             const text = userInput.value.trim();
-            const apiKey = apiKeyInput.value.trim();
-            if (!text || !apiKey) return;
+            if (!text) return;
 
-            // User Nachricht hinzufügen
+            // User-Nachricht anzeigen
             appendMessage(text, "user-message");
             userInput.value = "";
 
-            // Lade-Anzeige für Gemini
+            // Lade-Anzeige für Gemini erstellen
             const loadingId = "loading-" + Date.now();
             appendMessage("Gemini überlegt...", "gemini-message loading", loadingId);
 
             try {
-                // Initialisiere die Google Gen AI Instanz
-                const genAI = new GoogleGenerativeAI(apiKey);
-                // Nutzt das standardmäßige kostenlose Modell gemini-3.6-flash
-                const model = genAI.getGenerativeModel({ model: "gemini-3.6-flash" });
-
-                const result = await model.generateContent(text);
-                const response = await result.response;
-                const replyText = response.text();
-
-                // Lade-Anzeige entfernen und Antwort einfügen
+                // Kostenloser API-Aufruf über die Puter-Infrastruktur
+                const response = await puter.ai.chat(text, { model: 'gemini-3.8-flash' });
+                
+                // Lade-Anzeige entfernen und echte Antwort anzeigen
                 document.getElementById(loadingId).remove();
-                appendMessage(replyText, "gemini-message");
+                appendMessage(response, "gemini-message");
 
             } catch (error) {
                 console.error(error);
                 document.getElementById(loadingId).remove();
-                appendMessage("Fehler: Verbindung fehlgeschlagen. Überprüfe deinen API-Key.", "gemini-message");
+                appendMessage("Fehler: Verbindung zum AI-Dienst fehlgeschlagen.", "gemini-message");
             }
         }
 
