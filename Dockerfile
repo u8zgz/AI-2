@@ -1,7 +1,13 @@
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY index.html /usr/share/nginx/html/
+WORKDIR /app
 
-EXPOSE 80
+RUN echo '{"name":"gemini-proxy","version":"1.0.0","dependencies":{"express":"^4.19.2"}}' > package.json
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN npm install --production
+
+COPY index.html server.js ./
+
+EXPOSE 8080
+
+CMD ["node", "server.js"]
