@@ -1,5 +1,8 @@
 const express = require('express');
 const path = require('path');
+// Wichtig: Wir importieren das funktionierende DuckDuckGo-Interface
+const { DuckChat } = require('duckduckgo-chat-interface');
+
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -11,38 +14,17 @@ app.post('/api/chat', async (req, res) => {
     try {
         const userMessage = req.body.message;
 
-        // Nutzt das anmeldefreie DuckDuckGo AI Gateway
-        const response = await fetch('https://duckduckgo.com', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'User-Agent': 'Mozilla/5.0'
-            },
-            body: JSON.stringify({
-                model: 'gpt-4o-mini', // Kann kostenfrei & ohne Key genutzt werden
-                messages: [{ role: 'user', content: userMessage }]
-            })
-        });
+        // Erstellt eine frische, anonyme Session bei DuckDuckGo
+        const chat = new DuckChat();
+        await chat.initialize();
 
-        // DuckDuckGo liefert einen Text-Stream (Server-Sent Events) zurück
-        const text = await response.text();
-        
-        // Extrahiere den reinen Text aus dem Stream
-        const lines = text.split('\n');
-        let fullReply = '';
-        for (let line of lines) {
-            if (line.startsWith('data: ') && !line.includes('[DONE]')) {
-                try {
-                    const json = JSON.parse(line.slice(6));
-                    if (json.message) fullReply += json.message;
-                } catch(e) {}
-            }
-        }
+        // Holt die Antwort (Standardmodell ist hier ein schnelles gpt-4o-mini)
+        const response = await chat.fetchFull(userMessage);
 
-        res.json({ reply: fullReply || "Entschuldigung, ich konnte keine Antwort generieren." });
+        res.json({ reply: response });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ reply: "Server-Fehler bei der AI-Verbindung." });
+        console.error("Fehler beim AI-Aufruf:", error);
+        res.status(500).json({ reply: "Verbindung zum AI-Dienst fehlgeschlagen. Bitte versuche es noch einmal." });
     }
 });
 
