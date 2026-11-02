@@ -1,10 +1,8 @@
 {
-  "name": "gemini-proxy",
+  "name": "free-ai-chat",
   "version": "1.0.0",
-  "description": "Anmeldefreier Chat Proxy",
   "main": "server.js",
   "dependencies": {
-    "express": "^4.19.2",
-    "duckduckgo-chat-interface": "^0.0.8"
+    "express": "^4.19.2"
   }
 }
